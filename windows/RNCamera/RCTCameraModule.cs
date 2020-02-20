@@ -10,6 +10,7 @@ using Windows.Devices.Sensors;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
+using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
@@ -133,6 +134,41 @@ namespace RNCamera
             {
                 promise.Resolve("Not recording.");
             }
+        }
+
+        [ReactMethod]
+        public async void setFocus(JObject options, IPromise promise)
+        {
+            var viewTag = options.Value<int>("view");
+            var mediaCapture = CameraManager.GetCameraForView(viewTag).MediaCapture;
+            if (mediaCapture == null)
+            {
+                promise.Reject("No camera found.");
+                return;
+            }
+
+            var focusState = options.Value<double>("focusState");
+            var autoFocusOn = options.Value<bool>("autoFocusOn");
+            try
+            {
+                var vcFocus = mediaCapture.VideoDeviceController.Focus;
+                vcFocus.TrySetAuto(autoFocusOn);
+                vcFocus.TrySetValue(focusState);
+
+                vcFocus.TryGetValue(out double focus);
+                vcFocus.TryGetAuto(out bool autoFocus);
+
+                promise.Resolve(new Dictionary<string, object>
+                {
+                    { "focus", focus },
+                    { "autoFocus", autoFocus },
+                });
+            } catch
+            {
+
+            }
+
+
         }
 
         [ReactMethod]

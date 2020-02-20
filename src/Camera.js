@@ -327,6 +327,13 @@ export default class Camera extends Component {
     }
   };
 
+  setFocus(options) {
+    if (Platform.OS === 'windows') {
+      options['view'] = this._cameraHandle;
+    }
+    return CameraManager.setFocus(options);
+  }
+
   capture(options) {
     const props = convertNativeProps(this.props);
     options = {
